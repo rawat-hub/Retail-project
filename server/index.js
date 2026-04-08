@@ -117,9 +117,9 @@ app.post('/api/billing', async (req, res) => {
 });
 
 // ---------------------------------------------------------
-// ANALYTICS / DASHBOARD
+// DASHBOARD STATS
 // ---------------------------------------------------------
-app.get('/api/analytics', async (req, res) => {
+app.get('/api/dashboard-stats', async (req, res) => {
   // Aggregate data for Chart.js
   try {
     // Fetch recent 30 sales for chart representation
