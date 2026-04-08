@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { ShoppingCart, Plus, Minus, Trash2 } from 'lucide-react';
+import { API_BASE_URL } from '../config';
 
 function Billing() {
   const [products, setProducts] = useState([]);
@@ -13,7 +14,7 @@ function Billing() {
 
   const fetchInventory = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/inventory').catch(() => null);
+      const res = await axios.get(`${API_BASE_URL}/inventory`).catch(() => null);
       if (res && res.data) {
         setProducts(res.data);
       } else {
@@ -65,7 +66,7 @@ function Billing() {
   const handleCheckout = async () => {
     if(cart.length === 0) return;
     try {
-      // await axios.post('http://localhost:5000/api/billing', { cartItems: cart, totalAmount: total });
+      // await axios.post(`${API_BASE_URL}/billing`, { cartItems: cart, totalAmount: total });
       alert(`Checkout successful! Total: ₹${total.toFixed(2)}`);
       setCart([]);
       fetchInventory(); // refreshing stock

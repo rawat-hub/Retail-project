@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ShoppingBag, Search, Menu, X, User } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { API_BASE_URL } from '../config';
 
 // High quality placeholder garments
 const STORE_PRODUCTS = [
@@ -18,7 +19,7 @@ function Storefront() {
   const [isCartOpen, setIsCartOpen] = useState(false);
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/inventory')
+    fetch(`${API_BASE_URL}/inventory`)
       .then(res => res.json())
       .then(data => {
         if (data && data.length > 0) {
@@ -46,7 +47,7 @@ function Storefront() {
   const handleCheckout = async () => {
     if(cart.length === 0) return;
     try {
-      await fetch('http://localhost:5000/api/billing', {
+      await fetch(`${API_BASE_URL}/billing`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ cartItems: cart, totalAmount: cartTotal })

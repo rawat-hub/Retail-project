@@ -36,7 +36,7 @@ function Dashboard() {
     try {
       // In production, this points to your server. For MVP without live DB,
       // we'll mock the data if the server isn't running or returns error.
-      const res = await axios.get('http://localhost:5000/api/analytics').catch(() => null);
+      const res = await axios.get(`${API_BASE_URL}/analytics`).catch(() => null);
       
       if (res && res.data && res.data.labels) {
         setChartData(res.data);

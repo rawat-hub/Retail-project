@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Plus, Edit2, Trash2 } from 'lucide-react';
+import { API_BASE_URL } from '../config';
 
 function Inventory() {
   const [products, setProducts] = useState([]);
@@ -16,7 +17,7 @@ function Inventory() {
 
   const fetchInventory = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/inventory').catch(() => null);
+      const res = await axios.get(`${API_BASE_URL}/inventory`).catch(() => null);
       if (res && res.data) {
         setProducts(res.data);
       } else {
@@ -37,11 +38,11 @@ function Inventory() {
     e.preventDefault();
     if(formData.id) {
       // Update logic
-      // await axios.put(`http://localhost:5000/api/inventory/${formData.id}`, formData);
+      // await axios.put(`${API_BASE_URL}/inventory/${formData.id}`, formData);
       setProducts(products.map(p => p.id === formData.id ? {...formData, price: Number(formData.price), stock: Number(formData.stock)} : p));
     } else {
       // Create logic
-      // const res = await axios.post('http://localhost:5000/api/inventory', formData);
+      // const res = await axios.post(`${API_BASE_URL}/inventory`, formData);
       const newProduct = { ...formData, id: Date.now(), price: Number(formData.price), stock: Number(formData.stock) };
       setProducts([newProduct, ...products]);
     }
@@ -49,7 +50,7 @@ function Inventory() {
   };
 
   const handleDelete = (id) => {
-    // await axios.delete(`http://localhost:5000/api/inventory/${id}`);
+    // await axios.delete(`${API_BASE_URL}/inventory/${id}`);
     setProducts(products.filter(p => p.id !== id));
   };
 
