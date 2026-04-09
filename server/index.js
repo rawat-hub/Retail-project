@@ -57,59 +57,75 @@ app.delete('/api/inventory/:id', async (req, res) => {
 // BILLING / PROCESS SALE
 // ---------------------------------------------------------
 app.post('/api/billing', async (req, res) => {
-  const { cartItems, totalAmount } = req.body;
+  const { cartItems } = req.body;
   
   if (!cartItems || cartItems.length === 0) {
     return res.status(400).json({ error: 'Cart is empty' });
   }
 
   try {
-    // 1. Create a sale record
+    let calculatedTotal = 0;
+    const itemsToProcess = [];
+
+    // Step 1: Validate stock and strict price calculation
+    for (let item of cartItems) {
+      const { data: productData, error: productError } = await supabase
+        .from('products')
+        .select('price, stock')
+        .eq('id', item.id)
+        .single();
+        
+      if (productError || !productData) {
+         throw new Error(`Product ID ${item.id} not found`);
+      }
+      
+      if (productData.stock < item.qty) {
+         throw new Error(`Insufficient stock for ${item.name}. Only ${productData.stock} available.`);
+      }
+
+      calculatedTotal += (productData.price * item.qty);
+      
+      itemsToProcess.push({
+        ...item,
+        actualPrice: productData.price,
+        newStock: productData.stock - item.qty
+      });
+    }
+
+    // Step 2: Create a sale record
     const { data: saleData, error: saleError } = await supabase
       .from('sales')
-      .insert([{ total_amount: totalAmount }])
+      .insert([{ total_amount: calculatedTotal }])
       .select();
 
     if (saleError) throw saleError;
     const saleId = saleData[0].id;
 
-    // 2. Prepare sale items & stock decrements
+    // Step 3: Insert sale items & Update precise stock
     const saleItemsToInsert = [];
-    for (let item of cartItems) {
-      saleItemsToInsert.push({
-        sale_id: saleId,
-        product_id: item.id,
-        quantity: item.qty,
-        price: item.price
-      });
-      
-      // Fetch current stock to decrement safely (Assuming MVP low-concurrency)
-      const { data: productData, error: stockFetchError } = await supabase
-        .from('products')
-        .select('stock')
-        .eq('id', item.id)
-        .single();
-      
-      if (stockFetchError) throw stockFetchError;
-
-      const newStock = Math.max(0, productData.stock - item.qty);
-      
-      const { error: stockUpdateError } = await supabase
-        .from('products')
-        .update({ stock: newStock })
-        .eq('id', item.id);
-        
-      if (stockUpdateError) throw stockUpdateError;
+    for (let item of itemsToProcess) {
+       saleItemsToInsert.push({
+         sale_id: saleId,
+         product_id: item.id,
+         quantity: item.qty,
+         price: item.actualPrice
+       });
+       
+       const { error: stockUpdateError } = await supabase
+         .from('products')
+         .update({ stock: item.newStock })
+         .eq('id', item.id);
+         
+       if (stockUpdateError) throw stockUpdateError;
     }
 
-    // 3. Insert sale items
     const { error: saleItemsError } = await supabase
       .from('sale_items')
       .insert(saleItemsToInsert);
 
     if (saleItemsError) throw saleItemsError;
 
-    res.json({ success: true, saleId });
+    res.json({ success: true, saleId, actualTotal: calculatedTotal });
   } catch (err) {
     console.error('Checkout Error:', err);
     res.status(500).json({ error: err.message || 'Error processing transaction' });
@@ -117,12 +133,40 @@ app.post('/api/billing', async (req, res) => {
 });
 
 // ---------------------------------------------------------
+// RE-STOCK ITEMS (SMART RESTOCK)
+// ---------------------------------------------------------
+app.post('/api/inventory/restock', async (req, res) => {
+  const { productIds } = req.body;
+  
+  if (!productIds || productIds.length === 0) {
+    return res.status(400).json({ error: 'No products provided' });
+  }
+
+  try {
+    for (let id of productIds) {
+       const { data, error } = await supabase
+         .from('products')
+         .select('stock')
+         .eq('id', id)
+         .single();
+         
+       if (!error && data) {
+         // Auto-replenish stock safely to 50 items
+         const restockAmount = 50; 
+         await supabase.from('products').update({ stock: Math.max(data.stock, restockAmount) }).eq('id', id);
+       }
+    }
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ---------------------------------------------------------
 // DASHBOARD STATS
 // ---------------------------------------------------------
 app.get('/api/dashboard-stats', async (req, res) => {
-  // Aggregate data for Chart.js
   try {
-    // Fetch recent 30 sales for chart representation
     const { data: recentSales, error: salesError } = await supabase
       .from('sales')
       .select('*')
@@ -131,13 +175,33 @@ app.get('/api/dashboard-stats', async (req, res) => {
 
     if (salesError) throw salesError;
 
-    // We can also fetch total products sold, but we'll stick to a Revenue chart for MVP
     const labels = recentSales.map(s => {
       const d = new Date(s.created_at);
       return `${d.getMonth()+1}/${d.getDate()} ${d.getHours()}:${d.getMinutes()}`;
     });
     
     const revenues = recentSales.map(s => s.total_amount);
+
+    // Feature: Low Stock Items (< 10)
+    const { data: lowStockItems } = await supabase
+       .from('products')
+       .select('*')
+       .lte('stock', 10);
+       
+    // Feature: Dead Inventory (> 15 stock but not in recent 200 sale items)
+    const { data: potentialDeadItems } = await supabase
+       .from('products')
+       .select('*')
+       .gt('stock', 15);
+       
+    const { data: recentSaleItems } = await supabase
+       .from('sale_items')
+       .select('product_id')
+       .order('created_at', { ascending: false })
+       .limit(200);
+       
+    const recentlySoldIds = new Set(recentSaleItems ? recentSaleItems.map(si => si.product_id) : []);
+    const deadInventory = (potentialDeadItems || []).filter(p => !recentlySoldIds.has(p.id));
 
     res.json({
       labels,
@@ -149,7 +213,9 @@ app.get('/api/dashboard-stats', async (req, res) => {
           backgroundColor: 'rgba(56, 189, 248, 0.2)',
           borderColor: 'rgba(56, 189, 248, 1)',
         }
-      ]
+      ],
+      lowStockItems: lowStockItems || [],
+      deadInventory: deadInventory || []
     });
   } catch(err) {
     res.status(500).json({ error: err.message });

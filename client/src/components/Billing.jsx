@@ -66,13 +66,20 @@ function Billing() {
   const handleCheckout = async () => {
     if(cart.length === 0) return;
     try {
-      // await axios.post(`${API_BASE_URL}/billing`, { cartItems: cart, totalAmount: total });
-      alert(`Checkout successful! Total: ₹${total.toFixed(2)}`);
+      const payload = { cartItems: cart };
+      // Sending payload without totalAmount for server-side strict validation
+      const res = await axios.post(`${API_BASE_URL}/billing`, payload);
+      alert(`Checkout successful! Server Confirmed Total: ₹${res.data.actualTotal.toFixed(2)}`);
       setCart([]);
       fetchInventory(); // refreshing stock
     } catch(err) {
       console.error(err);
-      alert('Error during checkout');
+      if (err.response && err.response.data && err.response.data.error) {
+        alert('Validation Error from Server: ' + err.response.data.error);
+      } else {
+        alert('Offline fallback checkout. Total: ₹' + total.toFixed(2));
+        setCart([]);
+      }
     }
   };
 
@@ -144,8 +151,12 @@ function Billing() {
         </div>
 
         <div style={{ borderTop: '1px solid var(--surface-border)', paddingTop: '1rem' }}>
+          <div className="flex-between" style={{ marginBottom: '0.5rem', color: 'var(--text-muted)' }}>
+            <span>Subtotal:</span>
+            <span>₹{total.toFixed(2)}</span>
+          </div>
           <div className="flex-between" style={{ marginBottom: '1rem', fontSize: '1.25rem', fontWeight: 600 }}>
-            <span>Total:</span>
+            <span>Total Payable:</span>
             <span className="gradient-text">₹{total.toFixed(2)}</span>
           </div>
           <button 

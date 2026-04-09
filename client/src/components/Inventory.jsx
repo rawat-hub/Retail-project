@@ -37,12 +37,8 @@ function Inventory() {
   const handleSave = async (e) => {
     e.preventDefault();
     if(formData.id) {
-      // Update logic
-      // await axios.put(`${API_BASE_URL}/inventory/${formData.id}`, formData);
       setProducts(products.map(p => p.id === formData.id ? {...formData, price: Number(formData.price), stock: Number(formData.stock)} : p));
     } else {
-      // Create logic
-      // const res = await axios.post(`${API_BASE_URL}/inventory`, formData);
       const newProduct = { ...formData, id: Date.now(), price: Number(formData.price), stock: Number(formData.stock) };
       setProducts([newProduct, ...products]);
     }
@@ -50,8 +46,19 @@ function Inventory() {
   };
 
   const handleDelete = (id) => {
-    // await axios.delete(`${API_BASE_URL}/inventory/${id}`);
     setProducts(products.filter(p => p.id !== id));
+  };
+
+  const handleRestock = async (id) => {
+    try {
+      await axios.post(`${API_BASE_URL}/inventory/restock`, { productIds: [id] });
+      alert('Smart Restock successful!');
+      fetchInventory();
+    } catch(err) {
+      console.error(err);
+      // Fallback for UI if DB disconnected
+      setProducts(products.map(p => p.id === id ? { ...p, stock: Math.max(p.stock, 50) } : p));
+    }
   };
 
   return (
@@ -83,18 +90,29 @@ function Inventory() {
             <tbody>
               {products.map(p => (
                 <tr key={p.id}>
-                  <td>{p.name}</td>
+                  <td>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      {p.name}
+                      {p.stock <= 10 && <span style={{ fontSize: '0.7rem', padding: '0.2rem 0.5rem', background: 'rgba(255,86,48,0.1)', color: 'var(--danger-color)', borderRadius: '1rem', fontWeight: 600 }}>Low Stock</span>}
+                      {p.stock > 15 && <span style={{ fontSize: '0.7rem', padding: '0.2rem 0.5rem', background: 'rgba(255,171,0,0.1)', color: '#b37700', borderRadius: '1rem', fontWeight: 600 }}>Review for Dead Stock</span>}
+                    </div>
+                  </td>
                   <td><span style={{ color: 'var(--text-muted)' }}>{p.sku}</span></td>
                   <td>₹{Number(p.price).toFixed(2)}</td>
                   <td>
                     <span style={{
-                      color: p.stock < 10 ? 'var(--danger-color)' : 'var(--secondary-color)',
+                      color: p.stock <= 10 ? 'var(--danger-color)' : 'var(--secondary-color)',
                       fontWeight: 600
                     }}>
                       {p.stock}
                     </span>
                   </td>
                   <td className="text-right">
+                    {p.stock <= 10 && (
+                      <button className="btn btn-primary" style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem', marginRight: '0.5rem' }} onClick={() => handleRestock(p.id)}>
+                        Restock
+                      </button>
+                    )}
                     <button className="btn" style={{ background: 'transparent', color: 'var(--text-muted)', padding: '0.25rem' }}
                       onClick={() => { setFormData(p); setShowModal(true); }}>
                       <Edit2 size={16} />
