@@ -6,7 +6,7 @@ import Inventory from './components/Inventory';
 import Billing from './components/Billing';
 import Storefront from './components/Storefront';
 
-/** Admin Shell wrapper to keep the sidebar only on /admin routes */
+
 function AdminLayout() {
   return (
     <div className="app-container">
@@ -43,17 +43,17 @@ function App() {
   return (
     <Router>
       <Routes>
-        {/* Public Storefront Routes */}
+        {}
         <Route path="/" element={<Storefront />} />
 
-        {/* Admin Dashboard Routes */}
+        {}
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<Dashboard />} />
           <Route path="inventory" element={<Inventory />} />
           <Route path="billing" element={<Billing />} />
         </Route>
         
-        {/* Catch-all redirect */}
+        {}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>

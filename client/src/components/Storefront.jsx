@@ -2,8 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { ShoppingBag, Search, Menu, X, User } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { API_BASE_URL } from '../config';
-
-// High quality placeholder garments
 const STORE_PRODUCTS = [
   { id: 101, name: 'Premium Oxford Shirt', category: 'Shirts', price: 4999, image_url: '/img/oxford.png', stock: 45 },
   { id: 102, name: 'Linen Summer Shirt', category: 'Shirts', price: 3999, image_url: '/img/linen.png', stock: 20 },
@@ -55,7 +53,6 @@ function Storefront() {
       alert(`Checkout successful! Total: ₹${cartTotal.toFixed(2)}`);
       setCart([]);
       setIsCartOpen(false);
-      // Refresh inventory if needed
     } catch(err) {
       console.error(err);
       alert('Error during checkout');
@@ -65,7 +62,7 @@ function Storefront() {
   return (
     <div style={{ minHeight: '100vh', background: '#fff', color: '#172b4d', fontFamily: 'Inter, sans-serif' }}>
       
-      {/* Navbar */}
+      {}
       <nav style={{ padding: '1.25rem 5%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #dfe1e6', position: 'sticky', top: 0, background: 'rgba(255,255,255,0.95)', zIndex: 40, backdropFilter: 'blur(8px)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
           <h1 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 800, letterSpacing: '-0.5px' }}>MSR</h1>
@@ -89,7 +86,7 @@ function Storefront() {
         </div>
       </nav>
 
-      {/* Hero Section */}
+      {}
       <header style={{ 
         height: '60vh', 
         background: 'linear-gradient(rgba(0,0,0,0.1), rgba(0,0,0,0.4)), url(https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1600&q=80) center/cover', 
@@ -107,10 +104,10 @@ function Storefront() {
         </div>
       </header>
 
-      {/* Main Content */}
+      {}
       <main style={{ padding: '4rem 5%', maxWidth: '1400px', margin: '0 auto' }}>
         
-        {/* SHIRTS SECTION */}
+        {}
         <section id="shirts" style={{ marginBottom: '5rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderBottom: '2px solid #dfe1e6', paddingBottom: '1rem', marginBottom: '2rem' }}>
             <h2 style={{ fontSize: '2rem', margin: 0, color: '#172b4d' }}>Premium Shirts</h2>
@@ -124,7 +121,7 @@ function Storefront() {
           </div>
         </section>
 
-        {/* T-SHIRTS SECTION */}
+        {}
         <section id="tshirts">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderBottom: '2px solid #dfe1e6', paddingBottom: '1rem', marginBottom: '2rem' }}>
             <h2 style={{ fontSize: '2rem', margin: 0, color: '#172b4d' }}>Comfort T-Shirts</h2>
@@ -140,7 +137,7 @@ function Storefront() {
 
       </main>
 
-      {/* Cart Slide-out Drawer */}
+      {}
       {isCartOpen && (
         <>
           <div style={{ position: 'fixed', inset: 0, background: 'rgba(9,30,66,0.5)', zIndex: 45 }} onClick={() => setIsCartOpen(false)} />
@@ -184,7 +181,7 @@ function Storefront() {
         </>
       )}
 
-      {/* Footer */}
+      {}
       <footer style={{ background: '#f4f5f7', padding: '3rem 5%', textAlign: 'center', color: '#6b778c', borderTop: '1px solid #dfe1e6' }}>
         <p style={{ fontSize: '1.25rem', fontWeight: 700, color: '#172b4d', marginBottom: '1rem', margin: 0 }}>MSR Clothing Co.</p>
         <p style={{ margin: 0 }}>&copy; {new Date().getFullYear()} MSR. Premium Retail Platform.</p>
@@ -192,8 +189,6 @@ function Storefront() {
     </div>
   );
 }
-
-// Sub-component for products
 function ProductCard({ product, onAdd }) {
   return (
     <div style={{ cursor: 'pointer', group: 'true' }}>

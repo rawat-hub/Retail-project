@@ -27,13 +27,13 @@ body {
   min-height: 100vh;
 }
 
-/* Layout */
+
 .app-container {
   display: flex;
   min-height: 100vh;
 }
 
-/* Sidebar */
+
 .sidebar {
   width: 260px;
   background: var(--surface-color);
@@ -83,23 +83,23 @@ body {
   color: var(--primary-color);
 }
 
-/* Main Content */
+
 .main-content {
   flex: 1;
   padding: 2rem 3rem;
   overflow-y: auto;
 }
 
-/* Card */
+
 .glass-card {
   background: var(--surface-color);
   border: 1px solid var(--surface-border);
   border-radius: 8px;
   padding: 1.5rem;
-  box-shadow: 0 1px 3px rgba(9, 30, 66, 0.08); /* standard material/atl shadow */
+  box-shadow: 0 1px 3px rgba(9, 30, 66, 0.08); 
 }
 
-/* Typography */
+
 h1 {
   font-size: 1.75rem;
   font-weight: 600;
@@ -113,7 +113,7 @@ h2 {
   color: var(--text-main);
 }
 
-/* Tables */
+
 table {
   width: 100%;
   border-collapse: collapse;
@@ -138,7 +138,7 @@ tr:hover {
   background: #fafbfc;
 }
 
-/* Buttons */
+
 .btn {
   padding: 0.5rem 1rem;
   border-radius: 4px;
@@ -181,7 +181,7 @@ tr:hover {
   background: #ffbdad;
 }
 
-/* Inputs */
+
 .input-group {
   margin-bottom: 1rem;
 }
@@ -211,7 +211,7 @@ tr:hover {
   border-color: var(--primary-color);
 }
 
-/* Billing Grid */
+
 .billing-layout {
   display: grid;
   grid-template-columns: 2fr 1fr;
@@ -224,7 +224,7 @@ tr:hover {
   }
 }
 
-/* Utility */
+
 .flex-between {
   display: flex;
   justify-content: space-between;

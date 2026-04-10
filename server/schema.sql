@@ -1,9 +1,6 @@
--- Drop tables if they exist (for clean setup)
 DROP TABLE IF EXISTS sale_items;
 DROP TABLE IF EXISTS sales;
 DROP TABLE IF EXISTS products;
-
--- 1. Create Products Table
 CREATE TABLE products (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT NOT NULL,
@@ -14,15 +11,11 @@ CREATE TABLE products (
   image_url TEXT DEFAULT '',
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
-
--- 2. Create Sales Table
 CREATE TABLE sales (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   total_amount NUMERIC(12, 2) NOT NULL,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
-
--- 3. Create Sale Items Table (maps products to a sale)
 CREATE TABLE sale_items (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   sale_id UUID NOT NULL REFERENCES sales(id) ON DELETE CASCADE,
@@ -31,8 +24,6 @@ CREATE TABLE sale_items (
   price NUMERIC(10, 2) NOT NULL,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
-
--- Insert Dummy Data for Demo (Matching Storefront UI)
 INSERT INTO products (name, sku, price, stock, category, image_url) VALUES
 ('Premium Oxford Shirt', 'SHR-OXF-WHT', 4999.00, 45, 'Shirts', '/img/oxford.png'),
 ('Linen Summer Shirt', 'SHR-LIN-DBL', 3999.00, 20, 'Shirts', '/img/linen.png'),

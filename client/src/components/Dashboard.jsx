@@ -45,7 +45,6 @@ function Dashboard() {
         setLowStock(res.data.lowStockItems || []);
         setDeadInventory(res.data.deadInventory || []);
       } else {
-        // Fallback Mock Data
         setChartData({
           labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
           datasets: [
@@ -100,7 +99,7 @@ function Dashboard() {
       </h1>
       
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
-        {/* Revenue Chart */}
+        {}
         <div className="glass-card" style={{ gridColumn: '1 / -1', minHeight: '400px' }}>
           <h2 style={{ marginBottom: '1rem' }}>Revenue Trend (Past 30 Days)</h2>
           {!loading && chartData ? (
@@ -108,7 +107,7 @@ function Dashboard() {
           ) : <p>Loading chart data...</p>}
         </div>
 
-        {/* Low Stock Panel */}
+        {}
         <div className="glass-card" style={{ borderLeft: '4px solid var(--danger-color)' }}>
           <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--danger-color)', marginBottom: '1rem' }}>
             <AlertTriangle /> Low Stock Alerts
@@ -128,7 +127,7 @@ function Dashboard() {
           )}
         </div>
 
-        {/* Dead Inventory Panel */}
+        {}
         <div className="glass-card" style={{ borderLeft: '4px solid #ffab00' }}>
           <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ffab00', marginBottom: '1rem' }}>
             <PackageX /> Dead Inventory Insight

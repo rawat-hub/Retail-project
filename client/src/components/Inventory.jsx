@@ -6,8 +6,6 @@ import { API_BASE_URL } from '../config';
 function Inventory() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  // Form State
   const [showModal, setShowModal] = useState(false);
   const [formData, setFormData] = useState({ id: '', name: '', sku: '', price: '', stock: '', category: 'Shirts', image_url: '' });
 
@@ -21,7 +19,6 @@ function Inventory() {
       if (res && res.data) {
         setProducts(res.data);
       } else {
-        // Fallback for demo if backend isn't connected
         setProducts([
           { id: 1, name: 'Classic White T-Shirt', sku: 'TSHIRT-WHT-M', price: 1499, stock: 150 },
           { id: 2, name: 'Denim Jeans', sku: 'JEAN-BLU-32', price: 3999, stock: 85 }
@@ -56,7 +53,6 @@ function Inventory() {
       fetchInventory();
     } catch(err) {
       console.error(err);
-      // Fallback for UI if DB disconnected
       setProducts(products.map(p => p.id === id ? { ...p, stock: Math.max(p.stock, 50) } : p));
     }
   };

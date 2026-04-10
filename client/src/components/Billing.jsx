@@ -18,7 +18,6 @@ function Billing() {
       if (res && res.data) {
         setProducts(res.data);
       } else {
-        // Fallback for demo
         setProducts([
           { id: 1, name: 'Classic White T-Shirt', sku: 'TSHIRT-WHT-M', price: 1499, stock: 150 },
           { id: 2, name: 'Denim Jeans', sku: 'JEAN-BLU-32', price: 3999, stock: 85 }
@@ -67,11 +66,10 @@ function Billing() {
     if(cart.length === 0) return;
     try {
       const payload = { cartItems: cart };
-      // Sending payload without totalAmount for server-side strict validation
       const res = await axios.post(`${API_BASE_URL}/billing`, payload);
       alert(`Checkout successful! Server Confirmed Total: ₹${res.data.actualTotal.toFixed(2)}`);
       setCart([]);
-      fetchInventory(); // refreshing stock
+      fetchInventory(); 
     } catch(err) {
       console.error(err);
       if (err.response && err.response.data && err.response.data.error) {
@@ -90,7 +88,7 @@ function Billing() {
 
   return (
     <div className="billing-layout">
-      {/* Product Selection Area */}
+      {}
       <div>
         <h1>Point of Sale</h1>
         <div className="input-group">
@@ -119,7 +117,7 @@ function Billing() {
         </div>
       </div>
 
-      {/* Cart Area */}
+      {}
       <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 4rem)', position: 'sticky', top: '2rem' }}>
         <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <ShoppingCart /> Current Order

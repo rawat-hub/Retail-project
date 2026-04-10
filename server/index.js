@@ -6,35 +6,20 @@ const { createClient } = require('@supabase/supabase-js');
 const app = express();
 app.use(cors());
 app.use(express.json());
-
-// Initialize Supabase. For the demo, we will check if keys are provided,
-// otherwise we can fallback or log a warning.
 const supabaseUrl = process.env.SUPABASE_URL || 'https://placeholder.supabase.co';
 const supabaseKey = process.env.SUPABASE_ANON_KEY || 'placeholder_key';
 const supabase = createClient(supabaseUrl, supabaseKey);
-
-// ---------------------------------------------------------
-// GET INVENTORY
-// ---------------------------------------------------------
 app.get('/api/inventory', async (req, res) => {
   const { data, error } = await supabase.from('products').select('*').order('created_at', { ascending: false });
   if (error) return res.status(500).json({ error: error.message });
   res.json(data);
 });
-
-// ---------------------------------------------------------
-// ADD INVENTORY ITEM
-// ---------------------------------------------------------
 app.post('/api/inventory', async (req, res) => {
   const { name, sku, price, stock, category, image_url } = req.body;
   const { data, error } = await supabase.from('products').insert([{ name, sku, price, stock, category, image_url }]).select();
   if (error) return res.status(500).json({ error: error.message });
   res.json(data[0]);
 });
-
-// ---------------------------------------------------------
-// UPDATE INVENTORY ITEM
-// ---------------------------------------------------------
 app.put('/api/inventory/:id', async (req, res) => {
   const { id } = req.params;
   const { name, sku, price, stock, category, image_url } = req.body;
@@ -42,20 +27,12 @@ app.put('/api/inventory/:id', async (req, res) => {
   if (error) return res.status(500).json({ error: error.message });
   res.json(data[0]);
 });
-
-// ---------------------------------------------------------
-// DELETE INVENTORY ITEM
-// ---------------------------------------------------------
 app.delete('/api/inventory/:id', async (req, res) => {
   const { id } = req.params;
   const { error } = await supabase.from('products').delete().eq('id', id);
   if (error) return res.status(500).json({ error: error.message });
   res.json({ success: true });
 });
-
-// ---------------------------------------------------------
-// BILLING / PROCESS SALE
-// ---------------------------------------------------------
 app.post('/api/billing', async (req, res) => {
   const { cartItems } = req.body;
   
@@ -66,8 +43,6 @@ app.post('/api/billing', async (req, res) => {
   try {
     let calculatedTotal = 0;
     const itemsToProcess = [];
-
-    // Step 1: Validate stock and strict price calculation
     for (let item of cartItems) {
       const { data: productData, error: productError } = await supabase
         .from('products')
@@ -91,8 +66,6 @@ app.post('/api/billing', async (req, res) => {
         newStock: productData.stock - item.qty
       });
     }
-
-    // Step 2: Create a sale record
     const { data: saleData, error: saleError } = await supabase
       .from('sales')
       .insert([{ total_amount: calculatedTotal }])
@@ -100,8 +73,6 @@ app.post('/api/billing', async (req, res) => {
 
     if (saleError) throw saleError;
     const saleId = saleData[0].id;
-
-    // Step 3: Insert sale items & Update precise stock
     const saleItemsToInsert = [];
     for (let item of itemsToProcess) {
        saleItemsToInsert.push({
@@ -131,10 +102,6 @@ app.post('/api/billing', async (req, res) => {
     res.status(500).json({ error: err.message || 'Error processing transaction' });
   }
 });
-
-// ---------------------------------------------------------
-// RE-STOCK ITEMS (SMART RESTOCK)
-// ---------------------------------------------------------
 app.post('/api/inventory/restock', async (req, res) => {
   const { productIds } = req.body;
   
@@ -151,7 +118,6 @@ app.post('/api/inventory/restock', async (req, res) => {
          .single();
          
        if (!error && data) {
-         // Auto-replenish stock safely to 50 items
          const restockAmount = 50; 
          await supabase.from('products').update({ stock: Math.max(data.stock, restockAmount) }).eq('id', id);
        }
@@ -161,10 +127,6 @@ app.post('/api/inventory/restock', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-
-// ---------------------------------------------------------
-// DASHBOARD STATS
-// ---------------------------------------------------------
 app.get('/api/dashboard-stats', async (req, res) => {
   try {
     const { data: recentSales, error: salesError } = await supabase
@@ -181,14 +143,10 @@ app.get('/api/dashboard-stats', async (req, res) => {
     });
     
     const revenues = recentSales.map(s => s.total_amount);
-
-    // Feature: Low Stock Items (< 10)
     const { data: lowStockItems } = await supabase
        .from('products')
        .select('*')
        .lte('stock', 10);
-       
-    // Feature: Dead Inventory (> 15 stock but not in recent 200 sale items)
     const { data: potentialDeadItems } = await supabase
        .from('products')
        .select('*')
